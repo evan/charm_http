@@ -1,0 +1,10 @@
+CHANGELOG
+LICENSE
+README.rdoc
+Rakefile
+bin/charm-http
+lib/charm_http.rb
+lib/charm_http/grapher.rb
+lib/charm_http/installer.rb
+lib/charm_http/runner.rb
+Manifest
