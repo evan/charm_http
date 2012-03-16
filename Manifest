@@ -1,10 +1,10 @@
 CHANGELOG
 LICENSE
+Manifest
 README.rdoc
 Rakefile
-bin/charm-http
+bin/charm
 lib/charm_http.rb
 lib/charm_http/grapher.rb
 lib/charm_http/installer.rb
 lib/charm_http/runner.rb
-Manifest
