@@ -43,14 +43,14 @@ class CharmHttp
     value
   end
 
-  def self.ssh(instance, original_command, timeout = 0)
+  def self.ssh(instance, original_command, timeout = 0, quiet = false)
     command = original_command
-    command = "timeout -s INT #{timeout} #{command}" if timeout > 0
+    command = "timeout -s INT #{timeout} #{command} || true" if timeout > 0
     command = "ssh -t -i #{C[:key_file]} -o 'StrictHostKeyChecking no' ubuntu@#{instance.public_dns_name} '#{command}' 2>&1"
-    puts "#{instance.public_dns_name}: #{command}"
+    puts "#{instance.public_dns_name}: #{command}" if !quiet
     value = `#{command}`
     raise SshError if $? != 0
-    puts value
+    puts value if !quiet
     value
   rescue SshError
     sleep 5

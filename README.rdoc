@@ -1,0 +1,45 @@
+charm_http
+
+A parallel EC2 driver for running the hummingbird HTTP load testing tool against Heroku.
+
+== License
+
+Copyright 2012 Cloudburst, LLC. Licensed under the AFL 3. See the included LICENSE file.
+
+== Features
+
+* functionality
+
+== Installation
+
+  sudo gem install charm_http
+
+Add your AWS access keys to your enviroment:
+
+  export AWS_ACCESS_KEY_ID=???
+  export AWS_SECRET_ACCESS_KEY=???
+
+== Usage
+
+Start a pool:
+
+  $ charm 5
+
+Now, benchmark your app
+
+  $ charm benchmark /path/to/Heroku/app domain.name 1 10
+
+Graph your output:
+
+  $ charm graph domain.name
+
+Stop the pool:
+
+  $ charm stop
+
+More options are available by running
+
+  $ charm
+
+That's about it.
+

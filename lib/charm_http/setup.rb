@@ -23,10 +23,11 @@ class CharmHttp
         puts "#{instance.public_dns_name} running"
       end
 
+      threads = []
       instances.each do |instance|
         [
         "yes | sudo apt-get install make gcc git libevent-dev",
-        "git clone https://github.com/evan/hummingbird.git",
+        "git clone https://github.com/evan/hummingbird.git || cd hummingbird && git pull",
         "cd hummingbird && make hstress hplay"
         ].each do |command|
           CharmHttp.ssh(instance, command)
