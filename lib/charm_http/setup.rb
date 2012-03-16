@@ -3,7 +3,6 @@ class CharmHttp
   class Setup
     def self.start(n)
       instances = CharmHttp.instances
-      n = n.to_i
 
       if instances.size < n
         (n - instances.size).times do
@@ -33,8 +32,6 @@ class CharmHttp
           CharmHttp.ssh(instance, command)
         end
       end
-      debugger
-      1
     end
 
     def self.stop

@@ -8,6 +8,9 @@ AWS.config(
   "secret_access_key" => ENV["AWS_SECRET_ACCESS_KEY"])
 
 class CharmHttp
+  class SshError < RuntimeError
+  end
+
   C = {
     :version => 1,
     :ec2 => AWS::EC2.new.regions["us-east-1"]
@@ -33,9 +36,25 @@ class CharmHttp
 
   C[:image] = C[:ec2].images["ami-1a837773"]
 
-  def self.ssh(instance, command)
+  def self.run(command)
+    puts "localhost: #{command}"
+    value = `#{command} 2>&1`
+    puts value
+    value
+  end
+
+  def self.ssh(instance, original_command, timeout = 0)
+    command = original_command
+    command = "timeout -s INT #{timeout} #{command}" if timeout > 0
+    command = "ssh -t -i #{C[:key_file]} -o 'StrictHostKeyChecking no' ubuntu@#{instance.public_dns_name} '#{command}' 2>&1"
     puts "#{instance.public_dns_name}: #{command}"
-    `ssh -i #{C[:key_file]} -o "StrictHostKeyChecking no" ubuntu@#{instance.public_dns_name} '#{command}' 2>&1`
+    value = `#{command}`
+    raise SshError if $? != 0
+    puts value
+    value
+  rescue SshError
+    sleep 5
+    retry
   end
 
   def self.instances
