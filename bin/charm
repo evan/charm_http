@@ -2,4 +2,4 @@
 
 $LOAD_PATH << "#{File.dirname(__FILE__)}/../lib/"
 require 'charm_http'
-CharmHttp::Runner.new.run(ARGV)
+CharmHttp::Run.run(*ARGV)

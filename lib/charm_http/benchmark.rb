@@ -1,5 +1,4 @@
-
 class CharmHttp
-  class Runner
+  class Benchmark
   end
 end

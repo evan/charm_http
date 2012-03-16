@@ -4,6 +4,7 @@ Manifest
 README.rdoc
 Rakefile
 bin/charm
+charm_http.gemspec
 lib/charm_http.rb
 lib/charm_http/grapher.rb
 lib/charm_http/installer.rb

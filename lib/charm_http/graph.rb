@@ -1,5 +1,5 @@
 
 class CharmHttp
-  class Installer
+  class Graph
   end
 end
