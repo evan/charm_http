@@ -2,18 +2,23 @@
 class CharmHttp
   class Setup
     def self.start(n)
-      CharmHttp.instances.each do |instance|
+      instances = CharmHttp.instances
+      n = n.to_i
+
+      if instances.size < n
+        (n - instances.size).times do
+          instance = C[:image].run_instance(C.slice(:key_pair, :security_groups))
+          puts "Booted new instance"
+          instances << instance
+        end
+        while instances.any? {|i| i.status == :pending} do
+          sleep 1
+        end
+      elsif instances.size > n
+        instances[n..-1]
         puts "#{instance.public_dns_name} terminated"
         instance.delete
       end
-
-      instances = []
-      n.times do
-        instance = C[:image].run_instance(C.slice(:key_pair, :security_groups))
-        puts "Booted new instance"
-        instances << instance
-      end
-      sleep 1 while instances.any? {|i| i.status == :pending}
 
       instances.each do |instance|
         puts "#{instance.public_dns_name} running"
@@ -33,14 +38,19 @@ class CharmHttp
     end
 
     def self.stop
-      CharmHttp.instances.each(&:delete)
-      C[:key_pair].delete
+      CharmHttp.instances.each do |instance|
+        puts "#{instance.public_dns_name} terminated"
+        instance.delete
+      end
+
       begin
         C[:security_groups].delete
       rescue AWS::EC2::Errors::InvalidGroup::InUse
         sleep 2
         retry
       end
+      C[:key_pair].delete
+      File.unlink(C[:key_file])
     end
   end
 end
