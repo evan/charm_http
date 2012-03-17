@@ -37,29 +37,29 @@ class CharmHttp
   C[:image] = C[:ec2].images["ami-1a837773"]
 
   def self.run(command)
-    puts "localhost: #{command}"
+    puts "localhost: #{command}" if ENV['DEBUG']
     value = `#{command} 2>&1`
-    puts value
+    puts value if ENV['DEBUG']
     value
   end
 
-  def self.ssh(instance, original_command, timeout = 0, quiet = false)
+  def self.ssh(instance, original_command, timeout = nil)
     command = original_command
-    command = "timeout -s INT #{timeout} #{command} || true" if timeout > 0
+    command = "timeout -s INT #{timeout} #{command} || true" if timeout
     command = "ssh -t -i #{C[:key_file]} -o 'StrictHostKeyChecking no' ubuntu@#{instance.public_dns_name} '#{command}' 2>&1"
-    puts "#{instance.public_dns_name}: #{command}" if !quiet
+    puts "#{instance.public_dns_name}: #{command}" if ENV['DEBUG']
     value = `#{command}`
+    puts value if ENV['DEBUG']
     raise SshError if $? != 0
-    puts value if !quiet
     value
   rescue SshError
-    sleep 5
+    sleep 1
     retry
   end
 
   def self.instances
     instances = C[:ec2].instances.select do |instance|
-      instance.security_groups.first == C[:security_groups] and instance.status != :terminated
+      instance.security_groups.first == C[:security_groups] and instance.status == :running
     end
     puts "Found #{instances.size} instances"
     instances

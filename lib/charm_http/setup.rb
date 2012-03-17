@@ -10,7 +10,7 @@ class CharmHttp
           puts "Booted new instance"
           instances << instance
         end
-        while instances.any? {|i| i.status == :pending} do
+        while instances.any? {|i| i.status != :running} do
           sleep 1
         end
       elsif instances.size > n

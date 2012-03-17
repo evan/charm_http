@@ -23,18 +23,19 @@ class CharmHttp
           while hz > prev_hz
             concurrency += step
             prev_hz = hz
-            hz = parallel_test(instances, hostname, (concurrency * dynos / instances).to_i, 10, buckets, requests_per_connection, true)["hz"]
-            print "#{concurrency}->#{hz} ... "
+            hz = parallel_test(instances, hostname, (concurrency * dynos / instances.size).to_i, 10, buckets, requests_per_connection)["hz"]
+            puts "#{concurrency} -> #{hz}hz"
           end
           concurrency -= step
-          puts
 
           # Measure
           results[hostname] ||= {}
-          results[hostname][dynos] = parallel_test(instances, hostname, (concurrency * dynos / instances).to_i, 60, buckets, requests_per_connection)
+          results[hostname][dynos] = parallel_test(instances, hostname, (concurrency * dynos / instances.size).to_i, 60, buckets, requests_per_connection)
+          puts "Results for #{dynos} dynos"
+          pp results[hostname][dynos]
         end
 
-        File.write(hostname, results.inspect)
+        File.write("#{hostname}.data", results.inspect)
 
         reset(instances)
         scale(path, 1)
@@ -43,7 +44,7 @@ class CharmHttp
 
     def self.reset(instances)
       instances.each do |instance|
-        CharmHttp.ssh(instance, "killall hstress || true")
+        CharmHttp.ssh(instance, "killall hstress || true", nil, true)
       end
     end
 
@@ -60,9 +61,9 @@ class CharmHttp
       results
     end
 
-    def self.test(instance, hostname, concurrency, seconds, buckets, requests_per_connection, quiet = false)
+    def self.test(instance, hostname, concurrency, seconds, buckets, requests_per_connection)
       results = {}
-      value = CharmHttp.ssh(instance, "hummingbird/hstress -c #{concurrency} -b #{buckets} -p 1 -r #{requests_per_connection} -i 1 #{hostname} 80", seconds, quiet)
+      value = CharmHttp.ssh(instance, "hummingbird/hstress -c #{concurrency} -b #{buckets} -p 1 -r #{requests_per_connection} -i 1 #{hostname} 80", seconds)
       values = value[/(successes.*)/m, 1].split('#')
       values.map! {|v| v.split(/\s+/)}
       values.each {|v| v.reject!(&:empty?) }
