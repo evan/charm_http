@@ -28,7 +28,7 @@ class CharmHttp
         [
         "yes | sudo apt-get install make gcc git libevent-dev",
         "git clone https://github.com/evan/hummingbird.git || cd hummingbird && git pull",
-        "cd hummingbird && make hstress hplay"
+        "cd hummingbird && make hstress"
         ].each do |command|
           CharmHttp.ssh(instance, command)
         end
