@@ -1,5 +1,5 @@
 require 'rubygems'
-#require 'ruby-debug' if ENV['DEBUG']
+require 'ruby-debug' if ENV['DEBUG']
 require 'pp'
 require 'aws-sdk'
 require 'active_support/core_ext/hash'
