@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'ruby-debug' if ENV['DEBUG']
+#require 'ruby-debug' if ENV['DEBUG']
 require 'pp'
 require 'aws-sdk'
 require 'active_support/core_ext/hash'
@@ -62,7 +62,7 @@ class CharmHttp
   def self.ssh(instance, original_command, timeout = nil)
     command = original_command
     command = "timeout -s INT #{timeout} #{command} || true" if timeout
-    command = "ssh -t -i #{C[:key_file]} -o 'StrictHostKeyChecking no' ubuntu@#{instance.public_dns_name} '#{command}' 2>&1"
+    command = "ssh -i #{C[:key_file]} -o 'StrictHostKeyChecking no' ubuntu@#{instance.public_dns_name} '#{command}' 2>&1"
     puts "#{instance.public_dns_name}: #{command}" if ENV['DEBUG']
     response = `#{command}`
     puts response if ENV['DEBUG']
