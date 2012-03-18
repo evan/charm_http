@@ -31,7 +31,7 @@ class CharmHttp
 
           # Measure
           results[hostname] ||= {}
-          results[hostname][dynos] = parallel_test(instances, hostname, (concurrency * dynos / instances.size).to_i, 60, buckets, requests_per_connection)
+          results[hostname][dynos] = parallel_test(instances, hostname, (concurrency * dynos / instances.size).to_i, 90, buckets, requests_per_connection)
           puts "Results:"
           pp results[hostname][dynos]
         end
