@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'ruby-debug' if ENV['DEBUG']
+require 'pp'
 require 'aws-sdk'
 require 'active_support/core_ext/hash'
 
@@ -9,6 +10,8 @@ AWS.config(
 
 class CharmHttp
   class SshError < RuntimeError
+  end
+  class LocalError < RuntimeError
   end
 
   C = {
@@ -40,7 +43,20 @@ class CharmHttp
     puts "localhost: #{command}" if ENV['DEBUG']
     value = `#{command} 2>&1`
     puts value if ENV['DEBUG']
+    raise LocalError if $? != 0
     value
+  end
+
+  def self.parallel_ssh(instances, *args)
+    threads = []
+    response = []
+    instances.each do |instance|
+      threads << Thread.new do
+        response << ssh(instance, *args)
+      end
+    end
+    threads.each(&:join)
+    response
   end
 
   def self.ssh(instance, original_command, timeout = nil)
@@ -48,10 +64,10 @@ class CharmHttp
     command = "timeout -s INT #{timeout} #{command} || true" if timeout
     command = "ssh -t -i #{C[:key_file]} -o 'StrictHostKeyChecking no' ubuntu@#{instance.public_dns_name} '#{command}' 2>&1"
     puts "#{instance.public_dns_name}: #{command}" if ENV['DEBUG']
-    value = `#{command}`
-    puts value if ENV['DEBUG']
+    response = `#{command}`
+    puts response if ENV['DEBUG']
     raise SshError if $? != 0
-    value
+    response
   rescue SshError
     sleep 1
     retry
