@@ -6,12 +6,14 @@ class CharmHttp
     class HstressError < RuntimeError
     end
 
+    TIMEOUT = 30
+    TEST_DURATION = 30
+
     def self.run(paths, hostnames, dyno_min, dyno_max, buckets)
       targets = paths.split(',').zip(hostnames.split(','))
       instances = CharmHttp.instances
 
       raise NoInstances if instances.empty?
-      reset(instances)
 
       results = {}
 
@@ -21,22 +23,26 @@ class CharmHttp
           scale(path, dynos)
 
           # Find optimal concurrency per dyno
-          concurrency, prev_hz, hz = 10, 0, 1
+          concurrency = 20
           step = 10
+          prev_result = {}
+          result = {}
 
-          while hz > prev_hz
+          while result.empty? || prev_result.empty? || (result["hz"] > prev_result["hz"])
             concurrency += step
-            prev_hz = hz
-            hz = test(instances, hostname, (concurrency * dynos / instances.size).to_i, 10, buckets)["hz"]
-            puts "Concurrency #{concurrency}: #{hz}hz"
+            prev_result = result
+            reset(instances)
+            sleep TIMEOUT
+            print "Concurrency #{concurrency}: "
+            result = test(instances, hostname, (concurrency * dynos / instances.size).to_i, TEST_DURATION, buckets)
+            puts "#{result["hz"] / dynos}hz per dyno"
           end
-          concurrency -= step
 
-          # Measure
+          reset(instances)
+
           results[hostname] ||= {}
-          results[hostname][dynos] = test(instances, hostname, (concurrency * dynos / instances.size).to_i, 90, buckets)
-          puts "Results:"
-          pp results[hostname][dynos]
+          results[hostname][dynos] = prev_result
+          puts "Final: #{prev_result["hz"] / dynos}hz per dyno"
         end
 
         File.write("#{hostname}.data", results.inspect)
@@ -62,6 +68,9 @@ class CharmHttp
         values.each {|k, v, p| results[k] += v.to_i}
       end
       results
+    rescue Benchmark::HstressError
+      print "."
+      retry
     end
 
     def self.scale(path, dynos)
