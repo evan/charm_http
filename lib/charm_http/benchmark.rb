@@ -3,7 +3,10 @@ class CharmHttp
     class NoInstances < RuntimeError
     end
 
-    def self.run(paths, hostnames, dyno_min, dyno_max, buckets, requests_per_connection)
+    class HstressError < RuntimeError
+    end
+
+    def self.run(paths, hostnames, dyno_min, dyno_max, buckets)
       targets = paths.split(',').zip(hostnames.split(','))
       instances = CharmHttp.instances
 
@@ -17,21 +20,21 @@ class CharmHttp
           puts "Testing #{dynos} dynos..."
           scale(path, dynos)
 
-          # Find optimal concurrency
+          # Find optimal concurrency per dyno
           concurrency, prev_hz, hz = 10, 0, 1
           step = 10
 
           while hz > prev_hz
             concurrency += step
             prev_hz = hz
-            hz = test(instances, hostname, (concurrency * dynos / instances.size).to_i, 10, buckets, requests_per_connection)["hz"]
+            hz = test(instances, hostname, (concurrency * dynos / instances.size).to_i, 10, buckets)["hz"]
             puts "Concurrency #{concurrency}: #{hz}hz"
           end
           concurrency -= step
 
           # Measure
           results[hostname] ||= {}
-          results[hostname][dynos] = test(instances, hostname, (concurrency * dynos / instances.size).to_i, 90, buckets, requests_per_connection)
+          results[hostname][dynos] = test(instances, hostname, (concurrency * dynos / instances.size).to_i, 90, buckets)
           puts "Results:"
           pp results[hostname][dynos]
         end
@@ -47,9 +50,12 @@ class CharmHttp
       CharmHttp.parallel_ssh(instances, "killall hstress || true")
     end
 
-    def self.test(instance, hostname, concurrency, seconds, buckets, requests_per_connection)
+    def self.test(instance, hostname, concurrency, seconds, buckets)
       results = Hash.new(0)
-      CharmHttp.parallel_ssh(instance, "hummingbird/hstress -c #{concurrency} -b #{buckets} -p 1 -r #{requests_per_connection} -i 1 #{hostname} 80", seconds).each do |value|
+      CharmHttp.parallel_ssh(instance, "hummingbird/hstress -c #{concurrency} -b #{buckets} -i 1 #{hostname} 80", seconds).each do |value|
+        if value =~ /(Assertion.*?failed)/
+          raise HstressError, $1
+        end
         values = value[/(conn_successes.*)/m, 1].split('#')
         values.map! {|v| v.split(/\s+/)}
         values.each {|v| v.reject!(&:empty?) }
