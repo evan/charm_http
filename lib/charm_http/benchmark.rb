@@ -6,8 +6,8 @@ class CharmHttp
     class HstressError < RuntimeError
     end
 
-    TIMEOUT = 30
-    TEST_DURATION = 30
+    TIMEOUT = 60
+    TEST_DURATION = 120
 
     def self.run(paths, hostnames, dyno_min, dyno_max, buckets)
       targets = paths.split(',').zip(hostnames.split(','))
@@ -23,8 +23,8 @@ class CharmHttp
           scale(path, dynos)
 
           # Find optimal concurrency per dyno
-          concurrency = 20
-          step = 10
+          concurrency = 0
+          step = 15
           prev_result = {}
           result = {}
 
