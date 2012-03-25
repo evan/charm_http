@@ -6,6 +6,8 @@ class CharmHttp
     class HstressError < RuntimeError
     end
 
+    CONCURRENCIES = [20, 40, 60, 80, 100, 120]
+
     def self.run(paths, hostnames, dyno_min, dyno_max, test_duration, timeout, buckets)
       targets = paths.split(',').zip(hostnames.split(','))
       instances = CharmHttp.instances
@@ -15,32 +17,22 @@ class CharmHttp
       results = {}
 
       targets.each do |path, hostname|
+        results[hostname] ||= {}
+
         (dyno_min..dyno_max).each do |dynos|
+          results[hostname][dynos] ||={}
+
           puts "Testing #{dynos} dynos..."
           scale(path, dynos)
 
-          # Find optimal concurrency per dyno
-          concurrency = 0
-          step = 15
-          prev_result = {}
-          result = {}
-
-          while result.empty? || prev_result.empty? || (result["hz"] > prev_result["hz"])
-            concurrency += step
-            prev_result = result
+          CONCURRENCIES.each do |concurrency|
+            concurrency = concurrency * dynos
+            result = test(instances, hostname, concurrency, test_duration, buckets)
+            pp({hostname => {dynos => {concurrency => result}}})
+            results[hostname][dynos][concurrency] = result
+            sleep(timeout)
             reset(instances)
-            print "Concurrency #{concurrency}"
-            sleep timeout
-            print ": "
-            result = test(instances, hostname, (concurrency * dynos / instances.size).to_i, test_duration, buckets)
-            puts "#{result["hz"] / dynos}hz per dyno"
           end
-
-          reset(instances)
-
-          results[hostname] ||= {}
-          results[hostname][dynos] = prev_result
-          puts "Final: #{prev_result["hz"] / dynos}hz per dyno"
         end
 
         File.write("#{hostname}.data", results.inspect)
@@ -54,9 +46,9 @@ class CharmHttp
       CharmHttp.parallel_ssh(instances, "killall hstress || true")
     end
 
-    def self.test(instance, hostname, concurrency, seconds, buckets)
+    def self.test(instances, hostname, concurrency, seconds, buckets)
       results = Hash.new(0)
-      CharmHttp.parallel_ssh(instance, "hummingbird/hstress -c #{concurrency} -b #{buckets} -i 1 #{hostname} 80", seconds).each do |value|
+      CharmHttp.parallel_ssh(instances, "hummingbird/hstress -c #{concurrency / instances.size} -r 25 -b #{buckets} -i 1 #{hostname} 80", seconds).each do |value|
         if value =~ /(Assertion.*?failed)/
           raise HstressError, $1
         end
