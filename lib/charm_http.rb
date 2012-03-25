@@ -4,6 +4,8 @@ require 'pp'
 require 'aws-sdk'
 require 'active_support/core_ext/hash'
 
+STDOUT.sync = true
+
 AWS.config(
   "access_key_id" => ENV["AWS_ACCESS_KEY_ID"],
   "secret_access_key" => ENV["AWS_SECRET_ACCESS_KEY"])
@@ -13,6 +15,9 @@ class CharmHttp
   end
   class LocalError < RuntimeError
   end
+
+  LOG = File.open("/tmp/charm_http.log", "w")
+  LOG.sync = true
 
   C = {
     :version => 1,
@@ -38,11 +43,12 @@ class CharmHttp
   C[:security_groups] = group
 
   C[:image] = C[:ec2].images["ami-1a837773"]
+  C[:instance_type] = "m1.medium"
 
   def self.run(command)
-    puts "localhost: #{command}" if ENV['DEBUG']
+    LOG.puts "localhost: #{command}"
     value = `#{command} 2>&1`
-    puts value if ENV['DEBUG']
+    LOG.puts value
     raise LocalError if $? != 0
     value
   end
@@ -63,9 +69,9 @@ class CharmHttp
     command = original_command
     command = "timeout -s INT #{timeout} #{command} || true" if timeout
     command = "ssh -i #{C[:key_file]} -o 'StrictHostKeyChecking no' ubuntu@#{instance.public_dns_name} '#{command}' 2>&1"
-    puts "#{instance.public_dns_name}: #{command}" if ENV['DEBUG']
+    LOG.puts "#{instance.public_dns_name}: #{command}"
     response = `#{command}`
-    puts response if ENV['DEBUG']
+    LOG.puts response
     raise SshError if $? != 0
     response
   rescue SshError

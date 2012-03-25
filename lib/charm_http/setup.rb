@@ -6,7 +6,7 @@ class CharmHttp
 
       if instances.size < n
         (n - instances.size).times do
-          instance = C[:image].run_instance(C.slice(:key_pair, :security_groups))
+          instance = C[:image].run_instance(C.slice(:key_pair, :security_groups, :instance_type))
           puts "Booted new instance"
           instances << instance
         end
@@ -14,9 +14,13 @@ class CharmHttp
           sleep 1
         end
       elsif instances.size > n
-        instances[n..-1]
-        puts "#{instance.public_dns_name} terminated"
-        instance.delete
+        instances[n..-1].each do |instance|
+          puts "#{instance.public_dns_name} terminated"
+          instance.delete
+        end
+        while instances.any? {|i| i.status == :stopping} do
+          sleep 1
+        end
       end
 
       instances.each do |instance|

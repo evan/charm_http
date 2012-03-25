@@ -6,10 +6,7 @@ class CharmHttp
     class HstressError < RuntimeError
     end
 
-    TIMEOUT = 60
-    TEST_DURATION = 120
-
-    def self.run(paths, hostnames, dyno_min, dyno_max, buckets)
+    def self.run(paths, hostnames, dyno_min, dyno_max, test_duration, timeout, buckets)
       targets = paths.split(',').zip(hostnames.split(','))
       instances = CharmHttp.instances
 
@@ -32,9 +29,10 @@ class CharmHttp
             concurrency += step
             prev_result = result
             reset(instances)
-            sleep TIMEOUT
-            print "Concurrency #{concurrency}: "
-            result = test(instances, hostname, (concurrency * dynos / instances.size).to_i, TEST_DURATION, buckets)
+            print "Concurrency #{concurrency}"
+            sleep timeout
+            print ": "
+            result = test(instances, hostname, (concurrency * dynos / instances.size).to_i, test_duration, buckets)
             puts "#{result["hz"] / dynos}hz per dyno"
           end
 
