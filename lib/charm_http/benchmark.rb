@@ -60,7 +60,7 @@ class CharmHttp
         if value =~ /(Assertion.*?failed)/
           raise HstressError, $1
         end
-        values = value[/(conn_successes.*)/m, 1].split('#')
+        values = value[/# (hz.*)/m, 1].split('#')
         values.map! {|v| v.split(/\s+/)}
         values.each {|v| v.reject!(&:empty?) }
         values.each {|k, v, p| results[k] += v.to_i}

@@ -43,7 +43,7 @@ class CharmHttp
   C[:security_groups] = group
 
   C[:image] = C[:ec2].images["ami-1a837773"]
-  C[:instance_type] = "m1.medium"
+  C[:instance_type] = "m1.small"
 
   def self.run(command)
     LOG.puts "localhost: #{command}"
