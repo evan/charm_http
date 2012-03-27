@@ -6,6 +6,8 @@ class CharmHttp
     class HstressError < RuntimeError
     end
 
+    KEEPALIVE = 25
+
     def self.run(paths, hostnames, dyno_min, dyno_max, test_duration, timeout, concurrency, runs, buckets)
       targets = paths.split(',').zip(hostnames.split(','))
       instances = CharmHttp.instances
@@ -53,7 +55,7 @@ class CharmHttp
 
     def self.test(instances, hostname, concurrency, seconds, buckets)
       results = Hash.new(0)
-      CharmHttp.parallel_ssh(instances, "hummingbird/hstress -c #{concurrency / instances.size} -r 25 -b #{buckets} -i 1 #{hostname} 80", seconds).each do |value|
+      CharmHttp.parallel_ssh(instances, "hummingbird/hstress -c #{concurrency / instances.size} -r #{KEEPALIVE} -b #{buckets} -i 1 #{hostname} 80", seconds).each do |value|
         if value =~ /(Assertion.*?failed)/
           raise HstressError, $1
         end
