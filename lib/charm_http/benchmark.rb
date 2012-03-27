@@ -33,7 +33,7 @@ class CharmHttp
                   {dynos =>
                     {run => test(instances, hostname, total_concurrency, test_duration, buckets)}}}}}
             pp result
-            results.deep_merge!(hash)
+            results.deep_merge!(result)
 
             # Overwrite the file everytime so we never lose data
             File.write("#{hostname}.data", results.inspect)
