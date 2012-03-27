@@ -11,7 +11,7 @@ class CharmHttp
       instances = CharmHttp.instances
 
       raise NoInstances if instances.empty?
-
+      reset(instances)
       results = {}
 
       targets.each do |path, hostname|
@@ -32,12 +32,15 @@ class CharmHttp
                     {run => test(instances, hostname, total_concurrency, test_duration, buckets)}}}}}
             pp result
             results.deep_merge!(hash)
-            sleep(timeout)
+
+            # Overwrite the file everytime so we never lose data
+            File.write("#{hostname}.data", results.inspect)
+
             reset(instances)
+            sleep(timeout)
           end
         end
 
-        File.write("#{hostname}.data", results.inspect)
 
         reset(instances)
         scale(path, 1)
