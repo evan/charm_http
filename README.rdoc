@@ -12,6 +12,7 @@ Copyright 2012 Fauna, Inc. Licensed under the AFL 3. See the included LICENSE fi
 
 == Installation
 
+  gem install aws-sdk activesupport
   git clone git@github.com:fauna/charm_http.git
 
 Add your AWS access keys to your enviroment:
