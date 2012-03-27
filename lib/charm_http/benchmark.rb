@@ -22,7 +22,7 @@ class CharmHttp
         (dyno_min..dyno_max).each do |dynos|
           results[hostname][dynos] ||={}
 
-          puts "Testing #{dynos} dynos..."
+          puts "Testing #{dynos} dynos with #{instances.size} instances at concurrency:#{concurrency}, duration:#{test_duration}, timeout:#{timeout}..."
           scale(path, dynos)
 
           runs.times do |run|
