@@ -6,9 +6,7 @@ class CharmHttp
     class HstressError < RuntimeError
     end
 
-    CONCURRENCIES = [20, 40, 60, 80, 100, 120]
-
-    def self.run(paths, hostnames, dyno_min, dyno_max, test_duration, timeout, buckets)
+    def self.run(paths, hostnames, dyno_min, dyno_max, test_duration, timeout, concurrency, runs, buckets)
       targets = paths.split(',').zip(hostnames.split(','))
       instances = CharmHttp.instances
 
@@ -25,11 +23,15 @@ class CharmHttp
           puts "Testing #{dynos} dynos..."
           scale(path, dynos)
 
-          CONCURRENCIES.each do |concurrency|
-            concurrency = concurrency * dynos
-            result = test(instances, hostname, concurrency, test_duration, buckets)
-            pp({hostname => {dynos => {concurrency => result}}})
-            results[hostname][dynos][concurrency] = result
+          runs.times do |run|
+            total_concurrency = concurrency * dynos
+            result = {hostname =>
+              {instances.size =>
+                {total_concurrency =>
+                  {dynos =>
+                    {run => test(instances, hostname, total_concurrency, test_duration, buckets)}}}}}
+            pp result
+            results.deep_merge!(hash)
             sleep(timeout)
             reset(instances)
           end

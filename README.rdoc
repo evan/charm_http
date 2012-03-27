@@ -24,7 +24,7 @@ Add your AWS access keys to your enviroment:
 
 Start a pool:
 
-  $ bin/charm 5
+  $ bin/charm start 5
 
 Now, benchmark your app
 
