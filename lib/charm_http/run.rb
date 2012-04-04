@@ -3,7 +3,7 @@ class CharmHttp
   class Run
     def self.run(command = nil, *args)
       start_usage = "start number-of-instances [1]"
-      benchmark_usage = "benchmark paths hostnames dyno_min [1] dyno_max [10] test_duration [180] timeout [60] concurrency_per_dyno [100] runs [3] buckets [1,5,10,50,100,500,1000]"
+      benchmark_usage = "benchmark appnames hostnames dyno_min [1] dyno_max [10] test_duration [180] timeout [60] concurrency_per_dyno [100] runs [3] buckets [1,5,10,50,100,500,1000]"
       graph_usage = "graph test-name [most recent]"
       stop_usage = "stop"
 

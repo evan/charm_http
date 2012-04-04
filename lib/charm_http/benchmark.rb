@@ -8,18 +8,18 @@ class CharmHttp
 
     KEEPALIVE = 25
 
-    def self.run(paths, hostnames, dyno_min, dyno_max, test_duration, timeout, concurrency, runs, buckets)
-      targets = paths.split(',').zip(hostnames.split(','))
+    def self.run(appnames, hostnames, dyno_min, dyno_max, test_duration, timeout, concurrency, runs, buckets)
+      targets = appnames.split(',').zip(hostnames.split(','))
       instances = CharmHttp.instances
 
       raise NoInstances if instances.empty?
       reset(instances)
       results = {}
 
-      targets.each do |path, hostname|
+      targets.each do |appname, hostname|
         (dyno_min..dyno_max).each do |dynos|
           puts "Testing #{dynos} dynos with #{instances.size} instances at concurrency:#{concurrency}, duration:#{test_duration}, timeout:#{timeout}..."
-          scale(path, dynos)
+          scale(appname, dynos)
 
           runs.times do |run|
             total_concurrency = concurrency * dynos
@@ -41,7 +41,7 @@ class CharmHttp
 
 
         reset(instances)
-        scale(path, 1)
+        scale(appname, 1)
       end
     end
 
@@ -66,8 +66,8 @@ class CharmHttp
       retry
     end
 
-    def self.scale(path, dynos)
-      CharmHttp.run("cd #{path} && heroku restart && heroku ps:scale web=#{dynos}")
+    def self.scale(appname, dynos)
+      CharmHttp.run("heroku restart --app #{appname} && heroku ps:scale web=#{dynos} --app #{appname}")
     end
 
   end
