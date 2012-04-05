@@ -32,7 +32,9 @@ class CharmHttp
             results.deep_merge!(result)
 
             # Overwrite the file everytime so we never lose data
-            File.write("#{hostname}.data", results.inspect)
+            File.open("#{hostname}.data", 'w') do |f|
+              f.write(results.pretty_inspect)
+            end
 
             reset(instances)
             sleep(timeout)

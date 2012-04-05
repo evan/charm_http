@@ -31,7 +31,9 @@ class CharmHttp
     key_pair.delete and exit if !File.exist?(C[:key_file])
  else
     key_pair = C[:ec2].key_pairs.create(name)
-    File.write(C[:key_file], key_pair.private_key)
+    File.open(C[:key_file], 'w') do |f|
+      f.write(key_pair.private_key)
+    end
     system("chmod 600 #{C[:key_file]}")
   end
   C[:key_pair] = key_pair
