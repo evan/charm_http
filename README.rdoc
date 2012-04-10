@@ -28,7 +28,7 @@ Start a pool:
 
 Now, benchmark your app
 
-  $ bin/charm benchmark /local/path/to/Heroku/app app.domain.name 1 10
+  $ bin/charm benchmark appname app.domain.name 1 10
 
 Graph your output:
 
