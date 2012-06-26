@@ -20,6 +20,8 @@ Add your AWS access keys to your enviroment:
   export AWS_ACCESS_KEY_ID=???
   export AWS_SECRET_ACCESS_KEY=???
 
+You will also need to have R installed to create graphs.
+
 == Usage
 
 Start a pool:
@@ -33,6 +35,10 @@ Now, benchmark your app
 Graph your output:
 
   $ bin/charm graph domain.name.data
+
+Combine multiple datafiles:
+
+  $ bin/charm combine *.data > combined.data
 
 Stop the pool:
 
