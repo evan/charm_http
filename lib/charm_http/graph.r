@@ -25,8 +25,8 @@ colors = rainbow(nservices)
 # Add lines
 if (nrows < 2) {
   data.mx = as.matrix(data[2:ncol(data)])
-  par(las=3, mar=c(1,5,3,1))
-  barplot(data.mx, yaxp=c(0,ymax,4), beside=T, col=colors, ylab="Responses per second", border=T, names.arg=rep("", nservices))
+  par(las=3, mar=c(5,5,3,1))
+  barplot(data.mx, yaxp=c(0,ymax,4), beside=T, col=colors, xlab=paste(data[1,1], "dynos"), ylab="Responses per second", border=T, names.arg=rep("", nservices))
 } else {
   plot(xrange, yrange, type="n", xlab="Dynos", ylab="Responses per second")
   for (i in 1:nservices) {
