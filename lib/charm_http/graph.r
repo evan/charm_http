@@ -1,9 +1,12 @@
 
 # Load data
 data = read.table('tmp/data.ssv', header=T, sep=" ")
-headers = colnames(data)
 nservices = ncol(data) - 1
 nrows = nrow(data)
+
+# Sort column headers
+data = data[,c(c(1), order(names(data[2:ncol(data)]))+c(1))]
+headers = names(data)
 
 # Get X range
 xrange = range(data[1])
