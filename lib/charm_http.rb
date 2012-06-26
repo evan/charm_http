@@ -16,6 +16,9 @@ class CharmHttp
   class LocalError < RuntimeError
   end
 
+  LIB = File.dirname(__FILE__)
+  BIN = File.dirname(__FILE__) + "../bin/"
+
   LOG = File.open("/tmp/charm_http.log", "w")
   LOG.sync = true
 
