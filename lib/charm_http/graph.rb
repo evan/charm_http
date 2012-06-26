@@ -1,7 +1,4 @@
 
-require 'pp'
-require 'ruby-debug'
-
 class CharmHttp
   class Graph
     def self.graph(filename)

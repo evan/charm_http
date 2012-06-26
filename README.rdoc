@@ -32,7 +32,7 @@ Now, benchmark your app
 
 Graph your output:
 
-  $ bin/charm graph domain.name
+  $ bin/charm graph domain.name.data
 
 Stop the pool:
 

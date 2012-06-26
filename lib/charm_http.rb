@@ -2,7 +2,7 @@ require 'rubygems'
 require 'ruby-debug' if ENV['DEBUG']
 require 'pp'
 require 'aws-sdk'
-require 'active_support/core_ext/hash'
+require 'deep_merge'
 
 STDOUT.sync = true
 
@@ -97,4 +97,5 @@ require 'charm_http/run'
 require 'charm_http/setup'
 require 'charm_http/benchmark'
 require 'charm_http/graph'
+require 'charm_http/util'
 
