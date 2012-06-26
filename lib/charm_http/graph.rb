@@ -19,10 +19,10 @@ class CharmHttp
 
     def make_data
       Dir.mkdir("tmp") rescue nil
-      File.open("tmp/chart.tsv", "w") do |tsv|
-        tsv.puts "#{@filename}\t#{@headers.join('\t')}"
+      File.open("tmp/data.ssv", "w") do |ssv|
+        ssv.puts "#{@filename} #{@headers.join(' ')}"
         @x.each do |x|
-          tsv.write "#{@data[@headers.first][@workers][x].keys.first}\t"
+          ssv.write "#{@data[@headers.first][@workers][x].keys.first} "
 
           data = @headers.map do |header|
             hash = @data[header][@workers][x]
@@ -37,11 +37,11 @@ class CharmHttp
             max
           end
 
-          tsv.puts data.join('\t')
+          ssv.puts data.join(' ')
         end
       end
 
-      puts File.read("tmp/chart.tsv")
+      puts File.read("tmp/data.ssv")
     end
 
     def make_chart
