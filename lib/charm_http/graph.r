@@ -19,7 +19,7 @@ yrange = c(0,curmax)
 
 # Set up plot
 png(paste(headers[1], ".png", sep=""), width=8, height=6, units = 'in', res=150)
-plot(xrange, yrange, type="n", xlab="Dynos", ylab="Hz")
+plot(xrange, yrange, type="n", xlab="Dynos", ylab="Responses per second")
 colors = rainbow(nservices)
 
 # Add lines
