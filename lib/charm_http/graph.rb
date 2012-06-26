@@ -13,7 +13,12 @@ class CharmHttp
       @headers = @data.keys
       @workers = @data[@headers.first].keys.first
       @x = @headers.map do |header|
-        @data[header][@workers].keys
+        begin
+          @data[header][@workers].keys
+        rescue NoMethodError
+          puts "ERROR: Inconsistent benchmarking parameters for: #{@headers.join(',')}"
+          exit!
+        end
       end.flatten.uniq.sort
     end
 
